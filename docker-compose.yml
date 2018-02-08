@@ -1,0 +1,26 @@
+version: '3'
+
+services:
+
+  server:
+    build:
+      context: server
+      args:
+        - MODEL_NAME=identity
+    environment:
+      - MODEL_NAME=identity
+      - SERVING_PORT=8500
+    ports:
+      - "8500:8500"
+
+  client:
+    build:
+      context: client
+      args:
+        - MODEL_NAME=identity
+    environment:
+      - MODEL_NAME=identity
+      - SERVING_HOST=server
+      - SERVING_PORT=8500
+    links:
+      - server
