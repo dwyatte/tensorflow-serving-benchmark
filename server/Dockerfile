@@ -22,4 +22,4 @@ RUN python3 create_model.py $MODEL_PATH/$MODEL_NAME && rm create_model.py
 
 EXPOSE $SERVING_PORT
 
-CMD tensorflow_model_server --port=$SERVING_PORT --model_name=$MODEL_NAME --model_base_path=$MODEL_PATH/$MODEL_NAME
+CMD tensorflow_model_server --port=$SERVING_PORT --model_name=$MODEL_NAME --model_base_path=$MODEL_PATH/$MODEL_NAME --enable_batching=true

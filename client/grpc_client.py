@@ -1,5 +1,4 @@
 import os
-import sys
 import time
 import argparse
 import threading
@@ -39,7 +38,7 @@ class Benchmark(object):
 
     def wait(self):
         with self._condition:
-            while self._done == self._num_requests:
+            while self._done < self._num_requests:
                 self._condition.wait()
 
 
@@ -55,16 +54,16 @@ def _create_rpc_callback(benchmark):
     return _callback
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--model_name', default=os.environ['MODEL_NAME'])
+parser.add_argument('--model_name', default=os.getenv('MODEL_NAME', None))
+parser.add_argument('--serving_host', default=os.getenv('SERVING_HOST', None))
+parser.add_argument('--serving_port', default=os.getenv('SERVING_PORT', '8500'))
 parser.add_argument('--num_requests', default=1000)
 parser.add_argument('--max_concurrent', default=1)
-parser.add_argument('--host', default='server')
-parser.add_argument('--port', default=8500)
 args = parser.parse_args()
 
-channel = grpc.insecure_channel('{}:{}'.format(args.host, args.port))
+channel = grpc.insecure_channel('{}:{}'.format(args.serving_host, args.serving_port))
 stub = prediction_service_pb2_grpc.PredictionServiceStub(channel)
-benchmark = Benchmark(args.num_requests, args.max_concurrent)
+benchmark = Benchmark(int(args.num_requests), int(args.max_concurrent))
 
 start_time = time.time()
 
