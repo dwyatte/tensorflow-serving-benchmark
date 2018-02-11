@@ -4,7 +4,8 @@ RUN apt-get update && apt-get install -y \
     python3-pip \
     git \
     curl \
-    wrk
+    wrk \
+    apache2-utils
 
 ARG MODEL_NAME=identity
 ARG CLIENT_PORT=8000

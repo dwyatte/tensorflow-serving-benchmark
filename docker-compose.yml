@@ -13,13 +13,13 @@ services:
     ports:
       - "8500:8500"
 
-  falcon-client:
+  wsgi-client:
     build:
       context: client
       args:
         - MODEL_NAME=identity
     command:
-      gunicorn --workers=4 --worker-class=tornado --bind=0.0.0.0:8000 falcon_client:api
+      gunicorn --workers=4 --bind=0.0.0.0:8000 wsgi_client:api
     environment:
       - MODEL_NAME=identity
       - SERVING_HOST=server
@@ -36,14 +36,14 @@ services:
       args:
         - MODEL_NAME=identity
     command:
-      python3 tornado_client.py
+      python3 tornado_client.py --client_port=8000
     environment:
       - MODEL_NAME=identity
       - SERVING_HOST=server
       - SERVING_PORT=8500
       - CLIENT_PORT=8000
     ports:
-      - "8080:8000"
+      - "8000:8000"
     links:
       - server
 
@@ -53,7 +53,7 @@ services:
       args:
         - MODEL_NAME=identity
     command:
-      python3 grpc_client.py
+      python3 grpc_client.py --num_requests=10000 --max_concurrent=10
     environment:
       - MODEL_NAME=identity
       - SERVING_HOST=server
@@ -61,24 +61,20 @@ services:
     links:
       - server
 
-  falcon-benchmark:
+  wsgi-benchmark:
     build:
       context: client
-      args:
-        - MODEL_NAME=identity
     command:
-      wrk -t12 -c400 -d30s http://client:8000/prediction
+      ab -n 10000 -c 10 http://client:8000/prediction
     links:
       - server
-      - falcon-client:client
+      - wsgi-client:client
 
   tornado-benchmark:
     build:
       context: client
-      args:
-        - MODEL_NAME=identity
     command:
-      wrk -t12 -c400 -d30s http://client:8000/prediction
+      ab -n 10000 -c 10 http://client:8000/prediction
     links:
       - server
       - tornado-client:client
