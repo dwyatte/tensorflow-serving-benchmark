@@ -4,7 +4,6 @@ RUN apt-get update && apt-get install -y \
     python3-pip \
     git \
     curl \
-    wrk \
     apache2-utils
 
 ARG MODEL_NAME=identity
