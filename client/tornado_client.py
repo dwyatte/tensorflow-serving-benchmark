@@ -55,7 +55,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--model_name', default=os.getenv('MODEL_NAME', None))
 parser.add_argument('--serving_host', default=os.getenv('SERVING_HOST', None))
 parser.add_argument('--serving_port', default=os.getenv('SERVING_PORT', '8500'))
-parser.add_argument('--client_port', default=os.getenv('CLIENT_PORT', '8000'))
+parser.add_argument('--client_port', default=os.getenv('CLIENT_PORT', None))
 args = parser.parse_args()
 
 app = Application([

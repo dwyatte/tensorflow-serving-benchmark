@@ -7,6 +7,7 @@ services:
       context: server
       args:
         - MODEL_NAME=identity
+        - SERVING_PORT=8500
     environment:
       - MODEL_NAME=identity
       - SERVING_PORT=8500
@@ -17,14 +18,13 @@ services:
     build:
       context: client
       args:
-        - MODEL_NAME=identity
+        - CLIENT_PORT=8000
     command:
       gunicorn --workers=4 --bind=0.0.0.0:8000 wsgi_client:api
     environment:
       - MODEL_NAME=identity
       - SERVING_HOST=server
       - SERVING_PORT=8500
-      - CLIENT_PORT=8000
     ports:
       - "8000:8000"
     links:
@@ -34,24 +34,21 @@ services:
     build:
       context: client
       args:
-        - MODEL_NAME=identity
+        - CLIENT_PORT=8001
     command:
-      python3 tornado_client.py --client_port=8000
+      python3 tornado_client.py --client_port=8001
     environment:
       - MODEL_NAME=identity
       - SERVING_HOST=server
       - SERVING_PORT=8500
-      - CLIENT_PORT=8000
     ports:
-      - "8000:8000"
+      - "8001:8001"
     links:
       - server
 
   grpc-benchmark:
     build:
       context: client
-      args:
-        - MODEL_NAME=identity
     command:
       python3 grpc_client.py --num_requests=10000 --max_concurrent=10
     environment:
@@ -65,16 +62,16 @@ services:
     build:
       context: client
     command:
-      ab -n 10000 -c 10 http://client:8000/prediction
+      ab -n 10000 -c 10 http://wsgi-client:8000/prediction
     links:
       - server
-      - wsgi-client:client
+      - wsgi-client
 
   tornado-benchmark:
     build:
       context: client
     command:
-      ab -n 10000 -c 10 http://client:8000/prediction
+      ab -n 10000 -c 10 http://tornado-client:8001/prediction
     links:
       - server
-      - tornado-client:client
+      - tornado-client
